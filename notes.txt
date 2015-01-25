@@ -1,0 +1,187 @@
+- The prototype follows this article: http://www.codingpedia.org/ama/tutorial-rest-api-design-and-implementation-in-java-with-jersey-and-spring/
+- There is a slight change from the article we will use postgres since I loath mysql x-( x-( 
+
+- The demo uses a multi-layer architecture based on the "Law of Demeter"/"Pircinple of least knowledge"
+- Layer 1 is the REST support implemented via Jersey, it has the role of a facade nad delegates the logic to the business layer
+- The Business Layer is where the logic happens
+- The data access layer is where communication with the persistance storage takes place
+
+- Jersey Facade
+  * Jersey RESTful framework is an open source, production quality framework for developing RESTful Web Services in Java which provides support for the JAX-RS API and
+    serves as the JAX-RS flagship implementation
+
+- Spring (Business Layer)
+  * Spring DI beans and pojos are among the best in the Java world
+  * It has a large community follwoing
+  * It is the best way to create POJOs with different functionalities
+  * And the best part is Jersey has a hook into the wonderful world of spring (https://jersey.java.net/documentation/latest/spring.html) :) :)
+
+- JPA/Hibernate (Persistence Layer)
+  * We will try with hibernate first, but at some point I want to try JOOQ (http://www.jooq.org/doc/3.5/manual/getting-started/tutorials/jooq-with-jax-rs/)
+  * We will use the DAO patterrn in this instance for the persistence layer
+  * We are using JPA 2, which according to most people makes DAOs superfluous (I hate cluttering the service layer with JPA/Entity Manteger code)
+  * Hibernate is going to be used to support JPA 2
+
+- Web Container
+  * Maven is used as the deployer and packager into a .war file, this can be deployed to a tomcat or jetty server
+
+- Postgres
+  * I really really like postgres so I am using itt
+
+- DB Import --> Do the following steps
+  1. install mysql 5.6 or later onto your computer
+  2. install postgre onto your computer
+  3. insert the mysql dump file into the mysql server
+
+	mysql -uroot -hlocalhost < ../jersey_spring_prototype/src/main/resources/input_data/DumpRESTdemoDB.sql
+
+  4. dump the rest demo databse into a new dump file
+
+	mysqldump --compatible=postgresql --default-character-set=utf8 -r rest_demo.mysql -uroot rest_demo
+
+  5. Clone this repo
+
+	git clone git@github.com:lanyrd/mysql-postgresql-converter.git
+
+  6. Run the python file in that repo on your sql dump
+
+      python db_converter.py rest_demo.mysql rest_demo.psql
+
+  7. Import the rest_demo.psql into your psql server
+
+      psql -d rest_demo -f rest_demo.psql
+
+  8. Enjoy the awsomeness of postgres
+
+- REST resources
+  * Resources in this prototype represent podcasts
+  * Resources are the central concept of REST are are characterized by two things
+
+      1. Eahc is referenced by a global identifier (e.g. a URI in HTTP)
+      2. Has one or more representations which they expose to the outer world (we will only concern ourselves with the JSON representation)
+
+  * The endpoints in this prototype
+
+      /podcasts --> represents a resources that is a collection of podcasts
+      /podcasts/{id} --> URI identifying a podcast resource by the podcast's id
+
+  * A podcast has the following properties
+
+      1. id --> a unique identifer of the prodcast
+      2. feed --> uri feed of the podcast
+      3. title --> title of the podcast
+      4. linkOnPodcastpedia --> where one can find the podcast on Podcastpedia.org
+      5. description --> a short description of the podcast
+
+  * We can use one one Java class for the representation of the podcast resource, however the class and it properties/methods will get cluttered with both JPA and
+    XML/JAXB/JSON annotations
+  * We should avoid this at all costs and use two representations
+
+      - PodcastEntity.java - JPA annotated class used in the DB and business layers
+      - Podcast.java - JAXB/JSON annotated class used in the facade (Jersey layer) and business layers
+
+- Rest Methods
+
+    - Create --> Post
+    - Read --> Get
+    - Update --> PUT
+    - Delete --> DELETE
+
+  * The above are not 1:1 mappings, you can also have PUT for creation and POST for updating
+  * Read and Delete mata 1:1 to GET and DELETE
+  * We must remember REST is an architectural style, it isn't a specification and you should adapt it to your needs
+  * However if you are making your API public you still need to follow some best practices
+
+- Resource.Config.java
+  * This is used to register application resources, filters, exception mappers etc.
+
+- PodcastResource.java
+  * Acts as the controller in the JAX/RS world
+  * The class is annotated with @Path("/podcasts") - everything related to podcast resources will occur under this path
+  * The annotation is a relative URI
+  * PodcastService interface exposes the business logic to the REST facade layer
+
+- Creating Podcasts
+  * The most known way of resource creation is using POST, but you can also use PUT as will
+  * The differenct between POST vs. PUT
+
+      - POST (not idempotent)
+      - PUT (idempotent) --> with PUT you should know befroehand the location where the resource will be created and send all the possible values of the entry
+
+- Creating a single resource with POST
+
+	    @POST
+	    @Consumes({ MediaType.APPLICATION_JSON })
+	    @Produces({ MediaType.TEXT_HTML })
+	    public Response createPodcast(Podcast podcast) throws AppException {
+		Long createPodcastId = podcastService.createPodcast(podcast);
+		return Response.status(Response.Status.CREATED)// 201
+			.entity("A new podcast has been created")
+			.header("Location",
+				"http://localhost:8888/demo-rest-jersey-spring/podcasts/"
+					+ String.valueOf(createPodcastId)).build();
+	    }
+
+  Annotations
+    * @POST --> this annotation indicates tht the method responds to HTTP POST requests
+    * @Consumes({ MediaType.APPLICATION_JSON }) --> this defines the media type that this method accepts, in this case application/json
+    * @Produces({MediaType.TEXT_HTML}) --> defines the media type that the method can produce, in this case "text/html"
+
+  Response
+    * on success the method produces text/xml, with an HTTP status of 201 Created, and a location header which specifies where the resource was created
+    * on error one of two things can happen
+      400 Bad request if not enough data is provided
+      409 Conflict if on the server side it is determined a podcast with the same feed exists
+
+- Creating a single resource with PUT will be same as updating a resource on the server
+
+- Creating a single podcast from a form
+
+
+	/**
+	 * Adds a new podcast (resource) from "form" (at least title and feed
+	 * elements are required at the DB level)
+	 * 
+	 * @param title
+	 * @param linkOnPodcastpedia
+	 * @param feed
+	 * @param description
+	 * @return
+	 * @throws AppException
+	 */
+	@POST
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
+	@Produces({ MediaType.TEXT_HTML })
+	@Transactional
+	public Response createPodcastFromApplicationFormURLencoded(
+		@FormParam("title") String title,
+		@FormParam("linkOnPodcastpedia") String linkOnPodcastpedia,
+		@FormParam("feed") String feed,
+		@FormParam("description") String description) throws AppException {
+	 
+	    Podcast podcast = new Podcast(title, linkOnPodcastpedia, feed,
+		    description);
+	    Long createPodcastid = podcastService.createPodcast(podcast);
+	 
+	    return Response
+		    .status(Response.Status.CREATED)// 201
+		    .entity("A new podcast/resource has been created at /demo-rest-jersey-spring/podcasts/"
+			    + createPodcastid)
+		    .header("Location",
+			    "http://localhost:8888/demo-rest-jersey-spring/podcasts/"
+				    + String.valueOf(createPodcastid)).build();
+	}
+
+  Annotations
+  * @POST - this indicates the method responds to HTTP POST requests
+  * @Consumes({MediaType.APPLICATION_FORM_URLENCODED})- defines the media type the method accepts, in this case"application/x-www-form-urlencoded"
+  * @FormParam – present before the input parameters of the method this annotation binds the value(s) of a form parameter contained within a request
+		 entity body to a resource method parameter. Values are URL decoded unless this is disabled using the Encoded annotation
+  * @Produces({MediaType.TEXT_HTML}) – defines the media type that the method can produce, in this case “text/html”. The response will be a html document
+				       with a status of 201, indicating to the caller that the request has been fulfilled and resulted in a new resource being created.
+
+  Response
+  * on sucess text/html is returned with a HTTP status of 201 created, and a Location header spcifying where the resource has been created
+  * on error one of two things can happen
+    400 Bad request if not enough data is provided
+    409 Conflict is on the server side it has been determined a podcast with the same feed exists

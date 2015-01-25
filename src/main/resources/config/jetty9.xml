@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+  <New id="demoDS" class="org.eclipse.jetty.plus.jndi.Resource">
+     <Arg></Arg>
+     <Arg>jdbc/restDemoDB</Arg>
+     <Arg>
+        <New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+           <Set name="Url">jdbc:postgresql://127.0.0.1:5432/rest_demo</Set>
+           <Set name="User">tomislav</Set>
+           <Set name="Password">mun1ak0t!</Set>
+        </New>
+     </Arg>
+    </New>
+  <New id="demoLegacyDS" class="org.eclipse.jetty.plus.jndi.Resource">
+     <Arg></Arg>
+     <Arg>jdbc/restDemoLegacyDB</Arg>
+     <Arg>
+        <New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+           <Set name="Url">jdbc:postgresql://127.0.0.1:5432/rest_demo</Set>
+           <Set name="User">tomislav</Set>
+           <Set name="Password">mun1ak0t!</Set>
+        </New>
+     </Arg>
+    </New>    
+</Configure>
