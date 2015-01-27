@@ -1,1 +1,10 @@
 Manifest-Version: 1.0
+Implementation-Title: DemoRestWS
+Implementation-Version: 1.0-SNAPSHOT
+Built-By: tomislav
+Specification-Title: DemoRestWS
+Implementation-Vendor-Id: edu.depaul.capstone
+Created-By: Apache Maven 3.0.5
+Build-Jdk: 1.8.0_31
+Specification-Version: 1.0-SNAPSHOT
+

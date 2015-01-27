@@ -14,3 +14,7 @@ hs_err_pid*
 .idea
 */.idea
 *.iml
+
+README.md~
+notes.txt~
+target/

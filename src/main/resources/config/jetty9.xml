@@ -4,10 +4,12 @@
      <Arg></Arg>
      <Arg>jdbc/restDemoDB</Arg>
      <Arg>
-        <New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
-           <Set name="Url">jdbc:postgresql://127.0.0.1:5432/rest_demo</Set>
+        <New class="org.postgresql.ds.PGSimpleDataSource">
            <Set name="User">tomislav</Set>
            <Set name="Password">mun1ak0t!</Set>
+           <Set name="ServerName">localhost</Set>
+           <Set name="PortNumber">5432</Set>
+           <Set name="DatabaseName">rest_demo</Set>
         </New>
      </Arg>
     </New>
@@ -15,10 +17,12 @@
      <Arg></Arg>
      <Arg>jdbc/restDemoLegacyDB</Arg>
      <Arg>
-        <New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
-           <Set name="Url">jdbc:postgresql://127.0.0.1:5432/rest_demo</Set>
+        <New class="org.postgresql.ds.PGSimpleDataSource">
            <Set name="User">tomislav</Set>
            <Set name="Password">mun1ak0t!</Set>
+           <Set name="ServerName">localhost</Set>
+           <Set name="PortNumber">5432</Set>
+           <Set name="DatabaseName">rest_demo</Set>
         </New>
      </Arg>
     </New>    
