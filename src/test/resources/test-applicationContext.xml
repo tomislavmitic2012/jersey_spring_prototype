@@ -14,6 +14,9 @@
 
     <context:component-scan base-package="edu.depaul.capstone.demo.rest.*" />
 
+    <!--<context:property-placeholder location="classpath:db.properties"/>-->
+    <context:property-placeholder location="classpath:test_app.properties"/>
+
     <!-- import the dataSource definition -->
     <import resource="data-source.xml"/>
 
@@ -38,13 +41,22 @@
         <property name="configLocation" value="classpath:config/mybatisV3.xml"/>
     </bean>
 
+    <bean id="podcastService" class="edu.depaul.capstone.demo.rest.service.PodcastServiceDbAccessImpl" >
+        <property name="podcastDao" ref="podcastDao"/>
+    </bean>
+
     <bean id="podcastResource" class="edu.depaul.capstone.demo.rest.resource.podcast.PodcastsResource" >
         <property name="podcastService" ref="podcastService"/>
     </bean>
 
-    <bean id="podcastService" class="edu.depaul.capstone.demo.rest.service.PodcastServiceDbAccessImpl" >
-        <property name="podcastDao" ref="podcastDao"/>
+    <bean id="queryService" class="edu.depaul.capstone.demo.rest.service.QueryServiceImpl" >
+        <constructor-arg name="url" value="${app.socrata_url}"/>
+        <constructor-arg name="user" value="${app.socrata_username}"/>
+        <constructor-arg name="password" value="${app.socrata_password}"/>
+        <constructor-arg name="token" value="${app.socrata_app_token}"/>
     </bean>
+
+    <bean id="sodaResource" class="edu.depaul.capstone.demo.rest.resource.soda.SodaResource" />
 
     <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean" scope="singleton">
         <property name="jndiName" value="java:comp/env/jdbc/restDemoDB" />

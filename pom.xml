@@ -218,6 +218,24 @@
             <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.socrata</groupId>
+            <artifactId>soda-api-java</artifactId>
+            <version>0.9.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.2.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>1.2.2</version>
+        </dependency>
     </dependencies>
 
     <build>

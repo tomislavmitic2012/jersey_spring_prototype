@@ -23,7 +23,7 @@ java:comp/env/jdbc/pcmDB.
 
     <!-- Configurer that replaces ${...} placeholders with values from a properties file -->
     <!-- (in this case, JDBC-related settings for the dataSource definition below) -->
-    <context:property-placeholder location="classpath:db.properties"/>
+    <!--<context:property-placeholder location="classpath:db.properties"/>-->
 
     <bean id="dataSource" destroy-method="close"
           class="org.apache.commons.dbcp.BasicDataSource">
